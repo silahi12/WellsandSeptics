@@ -1,0 +1,81 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+
+<suite name="Selenium TestNG POM Suite" parallel="methods" thread-count="1">
+
+    <listeners>
+<!--        <listener class-name="org.testng.reporters.SuiteHTMLReporter"/>-->
+<!--        <listener class-name="org.testng.reporters.FailedReporter"/>-->
+        <listener class-name="pomFramework.listeners.ExtentReportListenerPom" />
+        <listener class-name="pomFramework.listeners.TestAllureListenerPom"/> <!-- Added Allure Listener -->
+    </listeners>
+
+    <test name="Login and Happy path Tests - Chrome">
+        <parameter name="browser" value="chrome"/>
+        <classes>
+<!--            <class name="pomFramework.testsPom.MvpLoginTest"/>-->
+            <class name="pomFramework.testsPom.LoginTest"/>
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct_EmissionControlEquipment"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct_Incinerators"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct_FuelBurningEquipment"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct_PortableCrushing"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct_EmergencyGenerator"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStandardPermitToConstruct_InternalCombustion"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_FederalTitleV_Part70_OperatingPermitApps"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStatePermitToOperate"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStatePermitToOperate_Incinerators"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_AirQualityStatePermitToOperate_FuelBurningEquipment"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_HazardousWaste_SplMedicalWasteIDNum"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndGroundWaterDischarge_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndGroundWaterDischarge_ReNew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndGroundWaterDischarge_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_NewSourcesDischargeProcessWastewater_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_NewSourcesDischargeProcessWastewater_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_NewSourcesDischargeProcessWastewater_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_ExistingSourcesDischargeProcessWastewater_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_ExistingSourcesDischargeProcessWastewater_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_DonotDischargeProcessWastewater_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_DonotDischargeProcessWastewater_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_DonotDischargeProcessWastewater_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_HatcheriesLaboratoriesFish_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_HatcheriesLaboratoriesFish_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_HatcheriesLaboratoriesFish_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_CAAP_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_CAAP_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_CAAP_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_IndustrialSourcesDischargeStormWater_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_IndustrialSourcesDischargeStormWater_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_IndustrialSourcesDischargeStormWater_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_WaterTreatmentPlants_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_WaterTreatmentPlants_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_WaterTreatmentPlants_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_GeneralDischargePermits_Marinas_MA_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_GeneralDischargePermits_SwimmingPoolsSpas_SI_NOI_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_GeneralDischargePermits_StormwaterAssociatedIndustrial_NOI_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_GeneralDischargePermits_StormwaterAssociatedIndustrial_NoExposure_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_GeneralDischargePermits_StormwaterAssociatedIndustrial_NoExposure_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_GeneralDischargePermits_StormwaterAssociatedIndustrial_NoExposure_Termination"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_MunicipalIndSurfaceWaterDischarge_WastewaterTreatmentPlantsGreater01MPerDay_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_MunicipalIndSurfaceWaterDischarge_WastewaterTreatmentPlantsGreater01MPerDay_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_MunicipalIndSurfaceWaterDischarge_WastewaterTreatmentPlantsGreater01MPerDay_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_PretreatmentPermit_SanitarySewer_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_PretreatmentPermit_SanitarySewer_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_PretreatmentPermit_SanitarySewer_Modification"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_PermitEquivalency_New"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_PermitEquivalency_Renew"/>-->
+<!--            <class name="pomFramework.testsPom.Mvp_HappyPath_PermitEquivalency_Modification"/>-->
+
+        </classes>
+    </test>
+
+    <!-- Uncomment the following test block to run tests in parallel on Firefox -->
+    <!--
+    <test name="Login Tests - Firefox">
+        <parameter name="browser" value="firefox"/>
+        <classes>
+            <class name="com.example.tests.LoginTest"/>
+        </classes>
+    </test>
+    -->
+
+</suite>

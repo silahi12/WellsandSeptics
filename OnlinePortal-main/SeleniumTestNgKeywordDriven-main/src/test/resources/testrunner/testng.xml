@@ -1,0 +1,32 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="EtsOnlinePortalTests" parallel="methods" thread-count="1">
+
+
+	<listeners>
+		<listener class-name="com.nal.listeners.ExtentReportListener" />
+		<listener class-name="com.nal.listeners.TestAllureListener" />
+	</listeners>
+
+	<test name="EtsTests">
+		<parameter name="browser" value="chrome"/>
+		<classes>
+			<class name="tests.ETSTests.ETS_LoginTest" />
+			<class name="tests.ETSTests.ETS_CreateNewDocForExistingAgency" />
+		</classes>
+	</test>
+
+	<test name="OnlinePortalTests">
+		<parameter name="browser" value="chrome"/>
+		<classes>
+			<class name="tests.LoginTests.TC_756_Verify_User_Login_Functionality" />
+			<class name="tests.LoginTests.TC_775_Login_Fails_With_Wrong_Password" />
+			<class name="tests.LoginTests.TC_776_Password_Field_Check_When_Empty_Password_Given" />
+			<class name="tests.LoginTests.TC_777_EmailID_Field_Check_When_Empty_EmailID_Given" />
+			<class name="tests.LoginTests.TC_778_EmailId_Password_Check_When_Empty_Given" />
+			<class name="tests.LoginTests.TC_779_EmailId_Password_Fields_CaseSensitive_Checks" />
+			<class name="tests.LoginTests.TC_780_Verify_LoginPage_UI" />
+		</classes>
+	</test>
+
+
+</suite>

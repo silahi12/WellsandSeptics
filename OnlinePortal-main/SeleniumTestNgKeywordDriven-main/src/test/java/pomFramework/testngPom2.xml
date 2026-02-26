@@ -1,0 +1,41 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+
+<suite name="Selenium TestNG POM Suite" parallel="methods" thread-count="1">
+
+    <listeners>
+<!--        <listener class-name="org.testng.reporters.SuiteHTMLReporter"/>-->
+<!--        <listener class-name="org.testng.reporters.FailedReporter"/>-->
+        <listener class-name="pomFramework.listeners.ExtentReportListenerPom" />
+        <listener class-name="pomFramework.listeners.TestAllureListenerPom"/> <!-- Added Allure Listener -->
+    </listeners>
+
+    <test name="Login and Happy path Tests - Chrome">
+        <parameter name="browser" value="chrome"/>
+        <classes>
+            <class name="pomFramework.testsPom.MvpLoginTest"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_ExistingSourcesDischargeProcessWastewater_Renew"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_ExistingSourcesDischargeProcessWastewater_Modification"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_DonotDischargeProcessWastewater_New"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_DonotDischargeProcessWastewater_Renew"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_DonotDischargeProcessWastewater_Modification"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_WaterTreatmentPlants_New"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_WaterTreatmentPlants_Renew"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndSurfaceWaterDischarge_WaterTreatmentPlants_Modification"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_PermitEquivalency_New"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_PermitEquivalency_Renew"/>
+            <class name="pomFramework.testsPom.Mvp_HappyPath_PermitEquivalency_Modification"/>
+
+        </classes>
+    </test>
+
+    <!-- Uncomment the following test block to run tests in parallel on Firefox -->
+    <!--
+    <test name="Login Tests - Firefox">
+        <parameter name="browser" value="firefox"/>
+        <classes>
+            <class name="com.example.tests.LoginTest"/>
+        </classes>
+    </test>
+    -->
+
+</suite>
