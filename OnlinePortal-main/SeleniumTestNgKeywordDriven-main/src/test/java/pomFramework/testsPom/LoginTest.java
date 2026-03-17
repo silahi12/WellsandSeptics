@@ -31,6 +31,7 @@ public class LoginTest extends BaseTestPom {
         Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful! Current Url - " + currentUrl);
         //Assert.assertTrue(dashboardPage.isProfileBtnDisplayed(), "Login was not successful!");
         System.out.println("Test Successful Login Passed!");
+        //System.out.println("Test Successful Login Passed!");
     }
 
     //@Test(description = "Verify login with invalid credentials")
