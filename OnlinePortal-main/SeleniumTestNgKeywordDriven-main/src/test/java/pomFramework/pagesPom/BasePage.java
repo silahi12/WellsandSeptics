@@ -496,15 +496,46 @@ public class BasePage {
      * @return The path to the saved screenshot file.
      */
     public static String getScreenshotPom(String methodName) {
+//        File srcFile = ((TakesScreenshot) DriverManagerPom.getDriverPom()).getScreenshotAs(OutputType.FILE);
+//        String path = System.getProperty("user.dir") + "/screenshot/" + methodName + "_" + System.currentTimeMillis()
+//                + ".png";
+//        File destination = new File(path);
+//        try {
+//            FileHandler.copy(srcFile, destination);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return path;
+
+         //Above code i commented as the Screenshot image was breaking and added the below code
+        // 1. Capture the screenshot
         File srcFile = ((TakesScreenshot) DriverManagerPom.getDriverPom()).getScreenshotAs(OutputType.FILE);
-        String path = System.getProperty("user.dir") + "/screenshot/" + methodName + "_" + System.currentTimeMillis()
-                + ".png";
-        File destination = new File(path);
+
+        // 2. Set the folder to be INSIDE the 'reports' directory
+        // Your HTML is in /reports/, so we save images in /reports/screenshots/
+        String folderPath = System.getProperty("user.dir") + "/reports/screenshots/";
+        File folder = new File(folderPath);
+
+        // 3. Create the directory if it's missing
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        // 4. Set the file name and absolute path for saving
+        String fileName = methodName + "_" + System.currentTimeMillis() + ".png";
+        String absolutePath = folderPath + fileName;
+        File destination = new File(absolutePath);
+
         try {
             FileHandler.copy(srcFile, destination);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed to save screenshot: " + e.getMessage());
         }
-        return path;
+
+        // 5. CRITICAL: Return the RELATIVE path for the HTML report
+        // Since the report is in /reports/, it just needs to look in 'screenshots/'
+        return "screenshots/" + fileName;
+
+
     }
 }

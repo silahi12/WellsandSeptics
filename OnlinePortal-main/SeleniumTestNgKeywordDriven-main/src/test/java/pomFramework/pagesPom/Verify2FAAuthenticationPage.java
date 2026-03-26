@@ -3,8 +3,6 @@ package pomFramework.pagesPom;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-import java.util.List;
-
 public class Verify2FAAuthenticationPage extends BasePage {
 
     public String verify2FAAuthenticationPageUrl = "/Verify";

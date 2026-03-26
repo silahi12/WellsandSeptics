@@ -1,7 +1,5 @@
 package pomFramework.testsPom.NonEtsTests;
 
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -11,8 +9,6 @@ import pomFramework.pagesPom.BasePage;
 import pomFramework.pagesPom.MvpSearchPermitsPage;
 import pomFramework.testsPom.BaseTestPom;
 import pomFramework.utilsPom.ConfigReader;
-
-import java.time.Duration;
 
 @Listeners(TestAllureListenerPom.class)
 public class Mvp_NON_ETS_OilGasExplorationProductionPermit extends BaseTestPom {

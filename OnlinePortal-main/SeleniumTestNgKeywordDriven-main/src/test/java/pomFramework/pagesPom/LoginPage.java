@@ -2,8 +2,6 @@ package pomFramework.pagesPom;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.testng.Assert;
-import pomFramework.driverPom.DriverManagerPom;
 import pomFramework.utilsPom.EmailClient;
 
 public class LoginPage extends BasePage {

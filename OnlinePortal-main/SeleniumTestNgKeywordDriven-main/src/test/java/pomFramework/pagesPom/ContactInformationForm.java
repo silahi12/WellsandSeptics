@@ -4,8 +4,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import pomFramework.dataPom.ContactDetails;
 
-import java.util.List;
-
 public class ContactInformationForm extends BasePage{
 
     // WebElements on the ContactInformationForm, identified using @FindBy annotations.

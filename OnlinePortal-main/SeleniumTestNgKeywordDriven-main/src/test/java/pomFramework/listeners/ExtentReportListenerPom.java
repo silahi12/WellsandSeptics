@@ -4,7 +4,6 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import com.nal.keywords.KeywordExecutor;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
@@ -45,7 +44,7 @@ public class ExtentReportListenerPom implements ITestListener {
         reporter.config().setReportName("Automation Test Results");
         extentReports.attachReporter(reporter);
         extentReports.setSystemInfo("System", "MAC");
-        extentReports.setSystemInfo("Author", "Anusha Gunda");
+        extentReports.setSystemInfo("Author", "Syed Khizar");
         extentReports.setSystemInfo("Build#", "1.1");
         extentReports.setSystemInfo("Team", "QA Team");
         extentReports.setSystemInfo("Customer Name", "Maryland Department of Environment");

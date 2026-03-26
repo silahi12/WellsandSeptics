@@ -5,8 +5,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
-import java.util.List;
-
 public class EtsIntDocPage extends BasePage {
 
     public String etsIntDocPageUrl = "/Application/Edit?INT_DOC_ID=";
