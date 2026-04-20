@@ -13,7 +13,7 @@
         <parameter name="browser" value="chrome"/>
         <classes>
 <!--            <class name="pomFramework.testsPom.MvpLoginTest"/>-->
-            <class name="pomFramework.testsPom.LoginTest"/>
+            <class name="pomFramework.testsPom.LoginTestold"/>
 <!--            <class name="pomFramework.testsPom.Mvp_HappyPath_FederalTitleV_Part70_OperatingPermitApps"/>-->
 <!--            <class name="pomFramework.testsPom.Mvp_HappyPath_HazardousWaste_SplMedicalWasteIDNum"/>-->
 <!--            <class name="pomFramework.testsPom.Mvp_HappyPath_IndustrialIndGroundWaterDischarge_New"/>-->
