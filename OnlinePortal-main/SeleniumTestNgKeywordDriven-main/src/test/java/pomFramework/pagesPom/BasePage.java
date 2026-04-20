@@ -538,4 +538,19 @@ public class BasePage {
 
 
     }
+
+
+    public void clickMdeOnlinePortal() {
+        // Uses the robust XPath for the logo/link
+        WebElement portalLink = DriverManagerPom.getDriverPom().findElement(By.xpath("//a[text()='MDE Online Portal']"));
+        portalLink.click();
+    }
+
+    public void clickDashboardMenu() {
+        // Assuming 'Dashboard' is a link in the nav menu or sidebar
+        WebElement dashboardLink = DriverManagerPom.getDriverPom().findElement(By.xpath("//a[contains(text(), 'Home')]"));
+        dashboardLink.click();
+    }
+
+
 }

@@ -24,6 +24,10 @@ public class DashboardPage extends BasePage {
     @FindBy(xpath = "//label[@id='toastMessage' and text()='Application submitted successfully!']")
     private WebElement submissionSuccessToastMsg;
 
+    @FindBy(xpath = "//a[normalize-space()='New Application']")
+    private WebElement newApplication;
+
+
     public DashboardPage() {
         super(); // Call the constructor of BasePage to initialize driver and PageFactory
     }
@@ -36,7 +40,9 @@ public class DashboardPage extends BasePage {
     public void clickPermitTab(){
         clickPom(permitTab);
     }
-
+    public void clickNewApplication(){
+        clickPom(newApplication);
+    }
     public boolean isMyApplicationsHeaderDisplayed() {
         return isElementDisplayedPom(myApplicationsHeader);
     }
@@ -54,4 +60,5 @@ public class DashboardPage extends BasePage {
         //wait until toast msg disappears
         waitForElementToDisappear(submissionSuccessToastMsg);
     }
+
 }

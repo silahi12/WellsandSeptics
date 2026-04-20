@@ -1,8 +1,14 @@
 package pomFramework.pagesPom;
 
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import pomFramework.driverPom.DriverManagerPom;
 import pomFramework.utilsPom.EmailClient;
+
+import java.time.Duration;
 
 public class LoginPage extends BasePage {
 
@@ -75,7 +81,14 @@ public class LoginPage extends BasePage {
      * @return true if error message is displayed, false otherwise.
      */
     public boolean isErrorMessageDisplayed() {
-        return isElementDisplayedPom(errorMessage);
+        // Wait up to 5 seconds for the element to become visible before returning true/false
+        try {
+            WebDriverWait wait = new WebDriverWait(DriverManagerPom.getDriverPom(), Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.visibilityOf(errorMessage));
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 
     public boolean isUserOnLoginUrl(){
