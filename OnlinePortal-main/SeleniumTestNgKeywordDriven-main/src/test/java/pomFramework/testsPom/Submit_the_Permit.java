@@ -1,12 +1,14 @@
 package pomFramework.testsPom;
 
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import pomFramework.driverPom.DriverManagerPom;
 import pomFramework.listeners.TestAllureListenerPom;
 import pomFramework.pagesPom.*;
 import pomFramework.utilsPom.ConfigReader;
+import pomFramework.utilsPom.ExcelUtils;
 
 import java.util.List;
 
@@ -60,7 +62,7 @@ public class Submit_the_Permit extends BaseTestPom {
         //Scroll to and click Apply now btn
         permitInfoPage.clickApplyNowBtnDisplayed();
         wellSiteAddressPage.addressSearchText("5 Ballymena");
-        Thread.sleep(100000);
+
 
     }
 
@@ -79,59 +81,80 @@ public class Submit_the_Permit extends BaseTestPom {
 
 
 
-    @Test(description = "Verify successful submit of the Wells Permit")
-    public void NavigateGreenFormFromDashboard() throws InterruptedException {
+    @Test(description = "Verify successful submit of the Wells Permit", dataProvider = "addressData")
+    public void NavigateGreenFormFromDashboard(String partialSearch, String exactAddress, String county, String city, String zipCode) throws InterruptedException {
         LoginPage loginPage = new LoginPage();
-        SearchPermitsPage  searchPermitsPage = new SearchPermitsPage();
+        SearchPermitsPage searchPermitsPage = new SearchPermitsPage();
         PermitInfoPage permitInfoPage = new PermitInfoPage();
         DashboardPage dashboardPage = new DashboardPage();
         WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
         BasePage basePage = new BasePage();
+
         loginPage.navigateToPOM(BASE_URL);
         //loginPage.loginWithOtp(STANDARD_USERNAME, STANDARD_PASSWORD, STANDARD_APP_PASSWORD);
         loginPage.login(STANDARD_USERNAME, STANDARD_PASSWORD);
-        // Assert that login was successful (e.g., check for URL change and element on next page)
+
+        // Assert that login was successful
         String currentUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
         Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful! Current Url - " + currentUrl);
-        //Assert.assertTrue(dashboardPage.isProfileBtnDisplayed(), "Login was not successful!");
         System.out.println("Test Successful Login Passed!");
-        //System.out.println("Test Successful Login Passed!");
+
         Thread.sleep(10000);
         Assert.assertTrue(searchPermitsPage.isSearchPermitPageHeaderDisplayed(), "Incorrect search permits page header");
         System.out.println("User is on Search permits page");
 
-// Click on the MDE Online Portal
-        // 1. Click the "MDE Online Portal" link in the header
+        // Click on the MDE Online Portal
         basePage.clickMdeOnlinePortal();
         System.out.println("Clicked MDE Online Portal link");
 
-// 2. Click on "Dashboard" (if it's a separate menu item)
-// Note: In many portals, clicking the brand logo takes you straight to the dashboard.
-// If it does, you can just verify the URL again.
+        // Click on "Dashboard"
         basePage.clickDashboardMenu();
 
-// 3. Final Assertion to ensure you are back home
-       // Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Failed to return to Dashboard! Current Url - " + DriverManagerPom.getDriverPom().getCurrentUrl());
+        // Final Assertion to ensure you are back home
         System.out.println("Successfully returned to Dashboard!");
         dashboardPage.clickNewApplication();
-        //wellSiteAddressPage.addressSearchText("5 Ballymena");
-           // Thread.sleep(100000);
 
 
-        // 1. Type in the partial search
-        wellSiteAddressPage.addressSearchText("5 bALL");
+        // --- DATA DRIVEN ADDRESS SECTION ---
 
-// 2. Get all the dropdown values
+        // 1. Type in the partial search (Using Excel Variable)
+        wellSiteAddressPage.addressSearchText(partialSearch);
+
+        // 2. Get all the dropdown values
         List<String> allOptions = wellSiteAddressPage.getAllDropdownValues();
 
-// 3. You can now assert against the list
+        // 3. Assert against the list (Using Excel Variable)
         Assert.assertTrue(allOptions.size() > 0, "The dropdown list was empty!");
-        Assert.assertTrue(allOptions.contains("5 BALLYMENA CT CATONSVILLE MD 21228 (Baltimore County)"));
+        Assert.assertTrue(allOptions.contains(exactAddress), "Dropdown did not contain expected address: " + exactAddress);
 
+        // 4. SELECT THE VALUE (Using Excel Variable)
+        wellSiteAddressPage.selectAddressFromDropdown(exactAddress);
+        System.out.println("Successfully selected the address from the dropdown: " + exactAddress);
+        Thread.sleep(5000);
 
-        // 4. SELECT THE VALUE (This is the new step)
-        wellSiteAddressPage.selectAddressFromDropdown("5 BALLYMENA CT CATONSVILLE MD 21228 (Baltimore County)");
-        System.out.println("Successfully selected the address from the dropdown!");
-Thread.sleep(100000);
+        // 2. USE THE NEW EXCEL VARIABLES
+        wellSiteAddressPage.selectCounty(county);
+        Thread.sleep(5000);
+        wellSiteAddressPage.selectCity(city);
+        Thread.sleep(5000);
+       // wellSiteAddressPage.enterZipCode(zipCode);
+        Thread.sleep(5000);
+
+        // 3. CLICK SAVE AND CONTINUE
+        wellSiteAddressPage.clickSaveAndContinue();
+        System.out.println("Successfully filled address details and clicked Save and Continue.");
+
+    }
+
+    // --- 1. SET UP THE DATA PROVIDER FOR ADDRESSES ---
+    @DataProvider(name = "addressData")
+    public Object[][] getAddressDataFromExcel() {
+        String projectPath = System.getProperty("user.dir");
+
+        // 1. Point to your EXISTING LoginData.xlsx file
+        String excelFilePath = projectPath + "/src/test/resources/testData/LoginData.xlsx";
+
+        // 2. Tell the utility to pull from your NEW "Addresses" sheet
+        return ExcelUtils.getExcelData(excelFilePath, "WellSiteAddress");
     }
 }

@@ -50,6 +50,73 @@ public class WellSiteAddressPage {
     // Locator to find ALL list items within the suggestions dropdown
     @FindBy(xpath = "//ul[@id='nameSuggestions']/li")
     private List<WebElement> addressSuggestionsList;
+
+    // --- ADD THESE NEW LOCATORS ---
+    // Update the IDs/XPaths to match your actual web page
+    @FindBy(id = "PHYSICAL_PARISH_OR_COUNTY_CODE")
+    private WebElement countyDropdown;
+
+    @FindBy(id = "PHYSICAL_ADDRESS_MUNICIPALITY")
+    private WebElement cityDropdown;
+
+    @FindBy(id = "physicalZip")
+    private WebElement zipCodeInput;
+
+    @FindBy(xpath = "//button[contains(text(), 'Save and Continue')]")
+    private WebElement saveAndContinueBtn;
+
+    // --- ADD THESE NEW METHODS ---
+
+    public void selectCounty(String countyName) {
+        JavascriptExecutor js = (JavascriptExecutor) DriverManagerPom.getDriverPom();
+        js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", countyDropdown);
+        wait.until(ExpectedConditions.visibilityOf(countyDropdown));
+        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(countyDropdown);
+
+        // ADD THIS TO PRINT ALL OPTIONS:
+        for (WebElement option : select.getOptions()) {
+            System.out.println("Available County Option: [" + option.getText() + "]");
+        }
+
+        select.selectByVisibleText(countyName);
+    }
+
+    public void selectCity(String cityName) {
+        wait.until(ExpectedConditions.visibilityOf(cityDropdown));
+        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(cityDropdown);
+
+        // ADD THIS TO PRINT ALL CITY OPTIONS:
+        System.out.println("--- AVAILABLE CITIES FOR THIS COUNTY ---");
+        for (WebElement option : select.getOptions()) {
+            System.out.println("Available City Option: [" + option.getText() + "]");
+        }
+
+        select.selectByVisibleText(cityName);
+    }
+
+    public void enterZipCode(String zipCode) {
+        wait.until(ExpectedConditions.visibilityOf(zipCodeInput));
+        zipCodeInput.clear();
+        zipCodeInput.sendKeys(zipCode);
+    }
+
+    public void clickSaveAndContinue() throws InterruptedException {
+        // 1. Scroll the Save button into view so it is on the screen
+        JavascriptExecutor js = (JavascriptExecutor) DriverManagerPom.getDriverPom();
+        js.executeScript("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", saveAndContinueBtn);
+
+        // 2. Wait a brief moment for the smooth scrolling animation to finish
+        Thread.sleep(1000);
+
+        // 3. Wait until the button is actually clickable, then click it
+        wait.until(ExpectedConditions.elementToBeClickable(saveAndContinueBtn));
+        saveAndContinueBtn.click();
+
+        System.out.println("Clicked the Save and Continue button.");
+
+        // 4. Wait for some time (e.g., 5 seconds) after clicking to let the next page load
+        Thread.sleep(5000);
+    }
     /** --------- Functions ------------- **/
 
     /**
