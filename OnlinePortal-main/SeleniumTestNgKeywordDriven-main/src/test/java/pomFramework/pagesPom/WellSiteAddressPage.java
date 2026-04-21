@@ -60,7 +60,7 @@ public class WellSiteAddressPage {
     private WebElement cityDropdown;
 
     @FindBy(id = "physicalZip")
-    private WebElement zipCodeInput;
+    private WebElement zipCodeDropdown;
 
     @FindBy(xpath = "//button[contains(text(), 'Save and Continue')]")
     private WebElement saveAndContinueBtn;
@@ -94,10 +94,13 @@ public class WellSiteAddressPage {
         select.selectByVisibleText(cityName);
     }
 
-    public void enterZipCode(String zipCode) {
-        wait.until(ExpectedConditions.visibilityOf(zipCodeInput));
-        zipCodeInput.clear();
-        zipCodeInput.sendKeys(zipCode);
+    public void selectZipCode(String zipCode) {
+        wait.until(ExpectedConditions.visibilityOf(zipCodeDropdown));
+        org.openqa.selenium.support.ui.Select select = new org.openqa.selenium.support.ui.Select(zipCodeDropdown);
+
+        // Select the Zip Code from the dropdown
+        select.selectByVisibleText(zipCode);
+        System.out.println("Selected Zip Code: " + zipCode);
     }
 
     public void clickSaveAndContinue() throws InterruptedException {
@@ -137,14 +140,15 @@ public class WellSiteAddressPage {
     }
 
     public void selectAddressFromDropdown(String exactAddressString) {
-        // Construct the dynamic XPath using the data-addressstring attribute from your DOM
+        // 1. Construct the dynamic XPath
         String xpathLocator = String.format("//li[@data-addressstring='%s']", exactAddressString);
 
-        // Wait specifically for that exact list item to appear in the DOM and become clickable
-        WebElement dropdownItem = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpathLocator)));
+        // 2. Wait for the element to exist in the DOM (presence, not visibility)
+        WebElement dropdownItem = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpathLocator)));
 
-        // Click the suggestion
-        dropdownItem.click();
+        // 3. FORCE THE CLICK using JavascriptExecutor to bypass Jenkins resolution/overlap issues
+        JavascriptExecutor js = (JavascriptExecutor) DriverManagerPom.getDriverPom();
+        js.executeScript("arguments[0].click();", dropdownItem);
     }
 
     /**

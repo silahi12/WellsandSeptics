@@ -132,14 +132,23 @@ public class Submit_the_Permit extends BaseTestPom {
         System.out.println("Successfully selected the address from the dropdown: " + exactAddress);
         Thread.sleep(5000);
 
-        // 2. USE THE NEW EXCEL VARIABLES
-        wellSiteAddressPage.selectCounty(county);
-        Thread.sleep(5000);
-        wellSiteAddressPage.selectCity(city);
-        Thread.sleep(5000);
-       // wellSiteAddressPage.enterZipCode(zipCode);
-        Thread.sleep(5000);
+        // --- 2. SELECT COUNTY, CITY, AND ZIP CODE FROM EXCEL ---
 
+        // Select County
+        wellSiteAddressPage.selectCounty(county);
+        Thread.sleep(2000); // Optional pause to let City populate
+
+        // Select City
+        wellSiteAddressPage.selectCity(city);
+        Thread.sleep(2000); // Optional pause to let Zip Code populate
+
+        // Clean the Zip Code (removes ".0" if Excel interpreted it as a decimal)
+        String cleanZip = String.valueOf(zipCode).replace(".0", "");
+
+        // Select Zip Code from the dropdown
+        wellSiteAddressPage.selectZipCode(cleanZip);
+
+        System.out.println("Successfully selected County, City, and Zip Code!");
         // 3. CLICK SAVE AND CONTINUE
         wellSiteAddressPage.clickSaveAndContinue();
         System.out.println("Successfully filled address details and clicked Save and Continue.");
