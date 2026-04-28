@@ -1,5 +1,6 @@
 package pomFramework.testsPom;
 
+import io.qameta.allure.Allure;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
@@ -34,6 +35,7 @@ public class Submit_the_Permit extends BaseTestPom {
         PermitInfoPage permitInfoPage = new PermitInfoPage();
         DashboardPage dashboardPage = new DashboardPage();
         WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
+        OwnerInfoPage ownerInfoPage = new OwnerInfoPage();
         BasePage basePage = new BasePage();
         loginPage.navigateToPOM(BASE_URL);
         //loginPage.loginWithOtp(STANDARD_USERNAME, STANDARD_PASSWORD, STANDARD_APP_PASSWORD);
@@ -81,13 +83,23 @@ public class Submit_the_Permit extends BaseTestPom {
 
 
 
-    @Test(description = "Verify successful submit of the Wells Permit", dataProvider = "addressData")
-    public void NavigateGreenFormFromDashboard(String partialSearch, String exactAddress, String county, String city, String zipCode) throws InterruptedException {
+    @Test(description = "Verify successful submit of the Wells Permit By Well Driller", dataProvider = "addressData")
+    public void NavigateGreenFormFromDashboard(String partialSearch, String exactAddress, String county, String city, String zipCode,String businessName, String phoneNumber, String emailAddress,String wellType, String pumpRate, String dailyQty, String depth, String diameter, String drillMethod, String sourceWater) throws InterruptedException {
+
+        //ADD THIS STOPPER ---
+        // If Excel feeds an empty or null row, skip the test immediately without failing it.
+        if (partialSearch == null || partialSearch.trim().isEmpty()) {
+            throw new org.testng.SkipException("Skipping test: Reached an empty row in the Excel sheet.");
+        }
+        // ------------------------
+
+
         LoginPage loginPage = new LoginPage();
         SearchPermitsPage searchPermitsPage = new SearchPermitsPage();
         PermitInfoPage permitInfoPage = new PermitInfoPage();
         DashboardPage dashboardPage = new DashboardPage();
         WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
+        OwnerInfoPage ownerInfoPage = new OwnerInfoPage();
         BasePage basePage = new BasePage();
 
         loginPage.navigateToPOM(BASE_URL);
@@ -152,6 +164,86 @@ public class Submit_the_Permit extends BaseTestPom {
         // 3. CLICK SAVE AND CONTINUE
         wellSiteAddressPage.clickSaveAndContinue();
         System.out.println("Successfully filled address details and clicked Save and Continue.");
+
+
+        // --- 4. ASSERT NAVIGATION TO NEXT PAGE ---
+
+        // Wait a few seconds to allow the browser to load the new page
+        Thread.sleep(5000);
+
+        // Get the new URL
+        String nextUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
+
+        // Assert the URL contains "GreenFormOwnerInfo"
+        Assert.assertTrue(nextUrl.contains("GreenFormOwnerInfo"),
+                "Failed to navigate to the Owner Info page. Current URL is: " + nextUrl);
+        Allure.step("Successfully verified navigation to the Owner Information page.");
+        System.out.println("Successfully navigated to the Owner Information page!");
+
+        // --- 5. FILL OUT OWNER INFORMATION PAGE ---
+
+
+        ownerInfoPage.fillBusinessOwnerInfoAndSubmit("Test Drilling Company LLC", "5551234567", "test@example.com");
+
+        // --- 6. ASSERT NAVIGATION TO NEXT PAGE ---
+        Thread.sleep(5000); // Wait for next page to load
+        String nextUrlAfterOwner = DriverManagerPom.getDriverPom().getCurrentUrl();
+
+        // Assuming the next page is "Well Information"
+        Assert.assertTrue(nextUrlAfterOwner.contains("WellInformation") || nextUrlAfterOwner.contains("WellInfo"),
+                "Failed to navigate to the Well Information page. Current URL is: " + nextUrlAfterOwner);
+
+        //Reporter.log("Navigation Assertion Passed! User is on the Well Information page.", true);
+
+
+// --- 7. FILL OUT WELL INFORMATION PAGE ---
+
+        // A. Set up the local file path for the upload safely using File.separator
+        String projectPath = System.getProperty("user.dir");
+        String siteMapPath = projectPath + java.io.File.separator + "src" + java.io.File.separator + "test" + java.io.File.separator + "resources" + java.io.File.separator + "testData" + java.io.File.separator + "dummySiteMap.pdf";
+
+        // Safety Check: Verify the file actually exists before Selenium tries to use it
+        java.io.File uploadFile = new java.io.File(siteMapPath);
+        if(!uploadFile.exists()){
+            System.out.println("CRITICAL ERROR: Cannot find the PDF at: " + siteMapPath);
+            Assert.fail("Test failed because the dummySiteMap.pdf file is missing. Please create it.");
+        }
+
+        // B. Clean up the numbers from Excel (removes ".0" if Excel interpreted them as decimals)
+        String cleanPump = String.valueOf(pumpRate).replace(".0", "");
+        String cleanQty = String.valueOf(dailyQty).replace(".0", "");
+        String cleanDepth = String.valueOf(depth).replace(".0", "");
+        String cleanDiam = String.valueOf(diameter).replace(".0", "");
+
+        // C. Call the wrapper method using the variables straight from the DataProvider
+        WellInfoPage wellInfoPage = new WellInfoPage();
+        wellInfoPage.fillWellInfoAndSubmit(
+                wellType,
+                cleanPump,
+                cleanQty,
+                cleanDepth,
+                cleanDiam,
+                drillMethod,
+                sourceWater,
+                siteMapPath
+        );
+
+
+        // --- 8. ASSERT NAVIGATION TO REVIEW PAGE ---
+
+        Thread.sleep(5000); // Wait for the server to process the form and file
+        String nextUrlAfterWellInfo = DriverManagerPom.getDriverPom().getCurrentUrl();
+
+        // Based on the JS in the HTML, a successful submit redirects to "/Application/NewWellPermit/Review/"
+        Assert.assertTrue(nextUrlAfterWellInfo.contains("Review"),
+                "Failed to navigate to the Review page. Current URL is: " + nextUrlAfterWellInfo);
+
+        System.out.println("Navigation Assertion Passed! User is on the Application Review page.");
+        io.qameta.allure.Allure.step("Successfully verified navigation to the Review page.");
+
+        Thread.sleep(50000);
+
+
 
     }
 
