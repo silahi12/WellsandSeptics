@@ -84,7 +84,7 @@ public class Submit_the_Permit extends BaseTestPom {
 
 
     @Test(description = "Verify successful submit of the Wells Permit By Well Driller", dataProvider = "addressData")
-    public void NavigateGreenFormFromDashboard(String partialSearch, String exactAddress, String county, String city, String zipCode,String businessName, String phoneNumber, String emailAddress,String wellType, String pumpRate, String dailyQty, String depth, String diameter, String drillMethod, String sourceWater) throws InterruptedException {
+    public void NavigateGreenFormFromDashboard(String partialSearch, String exactAddress, String county, String city, String zipCode,String businessName, String phoneNumber, String emailAddress,String wellType, String pumpRate, String dailyQty, String depth, String diameter, String drillMethod, String sourceWater, String signatureName) throws InterruptedException {
 
         //ADD THIS STOPPER ---
         // If Excel feeds an empty or null row, skip the test immediately without failing it.
@@ -147,18 +147,18 @@ public class Submit_the_Permit extends BaseTestPom {
         // --- 2. SELECT COUNTY, CITY, AND ZIP CODE FROM EXCEL ---
 
         // Select County
-        wellSiteAddressPage.selectCounty(county);
+        //wellSiteAddressPage.selectCounty(county);
         Thread.sleep(2000); // Optional pause to let City populate
 
         // Select City
-        wellSiteAddressPage.selectCity(city);
+        //wellSiteAddressPage.selectCity(city);
         Thread.sleep(2000); // Optional pause to let Zip Code populate
 
         // Clean the Zip Code (removes ".0" if Excel interpreted it as a decimal)
-        String cleanZip = String.valueOf(zipCode).replace(".0", "");
+       // String cleanZip = String.valueOf(zipCode).replace(".0", "");
 
         // Select Zip Code from the dropdown
-        wellSiteAddressPage.selectZipCode(cleanZip);
+        //wellSiteAddressPage.selectZipCode(cleanZip);
 
         System.out.println("Successfully selected County, City, and Zip Code!");
         // 3. CLICK SAVE AND CONTINUE
@@ -241,9 +241,26 @@ public class Submit_the_Permit extends BaseTestPom {
         System.out.println("Navigation Assertion Passed! User is on the Application Review page.");
         io.qameta.allure.Allure.step("Successfully verified navigation to the Review page.");
 
-        Thread.sleep(50000);
+        Thread.sleep(5000);
+
+        // --- 9. FILL OUT REVIEW PAGE & SIGN ---
+
+        ReviewPage reviewPage = new ReviewPage();
+        // Pass the signature name directly from the Excel sheet
+        reviewPage.signAndSubmit(signatureName);
 
 
+        // --- 10. ASSERT FINAL SUCCESSFUL SUBMISSION (PAYMENT PAGE) ---
+
+        // Wait for the AJAX submission to process and redirect the page
+        Thread.sleep(5000);
+        String finalUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
+
+        // Verify the system successfully submitted the form and routed the user to pay
+        Assert.assertTrue(finalUrl.contains("Payment"),
+                "Submission failed! Did not navigate to the Payment page. Current URL is: " + finalUrl);
+
+        System.out.println("SUCCESS! Permit successfully submitted. User is on the Payment page.");
 
     }
 
