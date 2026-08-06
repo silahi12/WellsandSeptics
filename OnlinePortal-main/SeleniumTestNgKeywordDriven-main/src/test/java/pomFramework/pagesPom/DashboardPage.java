@@ -6,7 +6,7 @@ import org.testng.Assert;
 
 public class DashboardPage extends BasePage {
 
-    public String dashboardUrl = "https://wellsandsepticsdevinternal.mde.state.md.us/Application/SearchPermitTypes";
+    public String dashboardUrl = "https://wellsandsepticdev.mde.maryland.gov/";
 
     // WebElements on the Dashboard page, identified using @FindBy annotations.
     @FindBy(xpath = "//li[@class='nav-item']/a[@href='/Account/Profile']")

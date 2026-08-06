@@ -28,47 +28,6 @@ public class Submit_the_Permit extends BaseTestPom {
     private static final String PERMIT_DETAIL_TYPE = "Well Permit Applications";
     private static final String PERMIT_ACTION_TYPE = "New (GREEN)";
 
-   // @Test(description = "Verify successful submit of the Wells Permit")
-    public void HappyPathPermitSubmittedSuccessfully() throws InterruptedException {
-        LoginPage loginPage = new LoginPage();
-        SearchPermitsPage  searchPermitsPage = new SearchPermitsPage();
-        PermitInfoPage permitInfoPage = new PermitInfoPage();
-        DashboardPage dashboardPage = new DashboardPage();
-        WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
-        OwnerInfoPage ownerInfoPage = new OwnerInfoPage();
-        BasePage basePage = new BasePage();
-        loginPage.navigateToPOM(BASE_URL);
-        //loginPage.loginWithOtp(STANDARD_USERNAME, STANDARD_PASSWORD, STANDARD_APP_PASSWORD);
-        loginPage.login(STANDARD_USERNAME, STANDARD_PASSWORD);
-        // Assert that login was successful (e.g., check for URL change and element on next page)
-        String currentUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
-        Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful! Current Url - " + currentUrl);
-        //Assert.assertTrue(dashboardPage.isProfileBtnDisplayed(), "Login was not successful!");
-        System.out.println("Test Successful Login Passed!");
-        //System.out.println("Test Successful Login Passed!");
-        Thread.sleep(10000);
-        Assert.assertTrue(searchPermitsPage.isSearchPermitPageHeaderDisplayed(), "Incorrect search permits page header");
-        System.out.println("User is on Search permits page");
-
-        //Search for Permit type
-        searchPermitsPage.search(PERMIT_TYPE);
-        searchPermitsPage.clickDetailsButtonForPermitType(PERMIT_TYPE);
-        //Assert User is on permit info page
-        currentUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
-        Assert.assertTrue(currentUrl.contains(permitInfoPage.permitInfoPageUrl), "User not on Permit info page. Current Url - " + currentUrl);
-        Assert.assertEquals(permitInfoPage.getHeaderText().trim(), PERMIT_TYPE.trim(), "Incorrect header on Permit info page");
-
-        //select Permit detail type and action type
-        permitInfoPage.selectPermitDetailType(PERMIT_DETAIL_TYPE);
-        permitInfoPage.selectPermitActionType(PERMIT_ACTION_TYPE);
-        //Scroll to and click Apply now btn
-        permitInfoPage.clickApplyNowBtnDisplayed();
-        wellSiteAddressPage.addressSearchText("5 Ballymena");
-
-
-    }
-
-
 
     //@Test(priority=1,description = "Verify login with invalid credentials")
     public void testInvalidLogin() {
@@ -82,187 +41,232 @@ public class Submit_the_Permit extends BaseTestPom {
     }
 
 
+    @Test(description = "Verify successful submit of the Wells Permit By Well Driller for OWNER IS BUSINESS", dataProvider = "addressData")
+    public void Submit_NWA_FromDashboard(
+            String searchMethod, String propertyNumber, String partialSearch, String exactAddress,
+            String isCorrectionNeeded, String correctionNotes, String isOwnerCorrectionNeeded, String ownercorrectionNotes,
+            String phoneNumber, String emailAddress,
+            String wellType, String pumpRate, String dailyQty, String depth,
+            String diameter, String drillMethod, String sourceWater, String signatureName, String ownerEmail, String ownerPhone) throws InterruptedException {
 
-    @Test(description = "Verify successful submit of the Wells Permit By Well Driller", dataProvider = "addressData")
-    public void NavigateGreenFormFromDashboard(String partialSearch, String exactAddress, String county, String city, String zipCode,String businessName, String phoneNumber, String emailAddress,String wellType, String pumpRate, String dailyQty, String depth, String diameter, String drillMethod, String sourceWater, String signatureName) throws InterruptedException {
-
-        //ADD THIS STOPPER ---
+        // --- SAFETY CHECK ---
         // If Excel feeds an empty or null row, skip the test immediately without failing it.
-        if (partialSearch == null || partialSearch.trim().isEmpty()) {
+        if ((partialSearch == null || partialSearch.trim().isEmpty()) && (propertyNumber == null || propertyNumber.trim().isEmpty())) {
             throw new org.testng.SkipException("Skipping test: Reached an empty row in the Excel sheet.");
         }
-        // ------------------------
 
-
+        // --- INITIALIZE PAGES ---
         LoginPage loginPage = new LoginPage();
-        SearchPermitsPage searchPermitsPage = new SearchPermitsPage();
-        PermitInfoPage permitInfoPage = new PermitInfoPage();
         DashboardPage dashboardPage = new DashboardPage();
         WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
         OwnerInfoPage ownerInfoPage = new OwnerInfoPage();
-        BasePage basePage = new BasePage();
+        WellInfoPage wellInfoPage = new WellInfoPage();
+        ReviewPage reviewPage = new ReviewPage();
 
+        // --- LOGIN & NAVIGATION ---
         loginPage.navigateToPOM(BASE_URL);
-        //loginPage.loginWithOtp(STANDARD_USERNAME, STANDARD_PASSWORD, STANDARD_APP_PASSWORD);
         loginPage.login(STANDARD_USERNAME, STANDARD_PASSWORD);
 
-        // Assert that login was successful
-        String currentUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
-        Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful! Current Url - " + currentUrl);
+        Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful! Current Url - " + DriverManagerPom.getDriverPom().getCurrentUrl());
         System.out.println("Test Successful Login Passed!");
 
         Thread.sleep(10000);
-        Assert.assertTrue(searchPermitsPage.isSearchPermitPageHeaderDisplayed(), "Incorrect search permits page header");
-        System.out.println("User is on Search permits page");
-
-        // Click on the MDE Online Portal
-        basePage.clickMdeOnlinePortal();
-        System.out.println("Clicked MDE Online Portal link");
-
-        // Click on "Dashboard"
-        basePage.clickDashboardMenu();
-
-        // Final Assertion to ensure you are back home
-        System.out.println("Successfully returned to Dashboard!");
         dashboardPage.clickNewApplication();
-
-
-        // --- DATA DRIVEN ADDRESS SECTION ---
-
-        // 1. Type in the partial search (Using Excel Variable)
-        wellSiteAddressPage.addressSearchText(partialSearch);
-
-        // 2. Get all the dropdown values
-        List<String> allOptions = wellSiteAddressPage.getAllDropdownValues();
-
-        // 3. Assert against the list (Using Excel Variable)
-        Assert.assertTrue(allOptions.size() > 0, "The dropdown list was empty!");
-        Assert.assertTrue(allOptions.contains(exactAddress), "Dropdown did not contain expected address: " + exactAddress);
-
-        // 4. SELECT THE VALUE (Using Excel Variable)
-        wellSiteAddressPage.selectAddressFromDropdown(exactAddress);
-        System.out.println("Successfully selected the address from the dropdown: " + exactAddress);
         Thread.sleep(5000);
 
-        // --- 2. SELECT COUNTY, CITY, AND ZIP CODE FROM EXCEL ---
+        // --- 1. WELL SITE ADDRESS PAGE (UPDATED FLOW) ---
 
-        // Select County
-        //wellSiteAddressPage.selectCounty(county);
-        Thread.sleep(2000); // Optional pause to let City populate
+        // Determine Search Method based on Excel Data
+        if (propertyNumber != null && !propertyNumber.trim().isEmpty()) {
 
-        // Select City
-        //wellSiteAddressPage.selectCity(city);
-        Thread.sleep(2000); // Optional pause to let Zip Code populate
+            System.out.println("Property Number data found in Excel. Initiating Property Search for: " + propertyNumber);
 
-        // Clean the Zip Code (removes ".0" if Excel interpreted it as a decimal)
-       // String cleanZip = String.valueOf(zipCode).replace(".0", "");
+            // 1. Click the radio button label to ensure the form triggers the input to enable
+            // (Even if it is selected by default, clicking the label ensures the USWDS JS is active)
+            wellSiteAddressPage.selectPropertySearchRadio();
 
-        // Select Zip Code from the dropdown
-        //wellSiteAddressPage.selectZipCode(cleanZip);
+            // 2. Enter the property number and click search
+            // (Assumes your POM method handles the waiting and the search button click)
+            wellSiteAddressPage.searchByPropertyNumber(propertyNumber);
 
-        System.out.println("Successfully selected County, City, and Zip Code!");
-        // 3. CLICK SAVE AND CONTINUE
+            System.out.println("Successfully searched by Property Number: " + propertyNumber);
+
+
+            // 1. Verify the message is physically displayed on the screen
+            Assert.assertTrue(wellSiteAddressPage.isSuccessMessageDisplayed(),
+                    "The property search success message was NOT displayed!");
+
+// 2. Verify the text exactly matches the expected USWDS output
+            String expectedMessage = "The correct address was successfully found. Please scroll down to save";
+            Assert.assertEquals(wellSiteAddressPage.getSuccessMessageText(), expectedMessage,
+                    "The success message text did not match the expected value!");
+
+
+        } else {
+            // Assume you created a POM method that clicks the 'rbMethodAddress' radio label
+            wellSiteAddressPage.selectAddressSearchRadio();
+
+            // 1. Type in the partial search
+            wellSiteAddressPage.addressSearchText(partialSearch);
+
+            // 2. Get all the dropdown values & Assert
+            List<String> allOptions = wellSiteAddressPage.getAllDropdownValues();
+            Assert.assertTrue(allOptions.size() > 0, "The dropdown list was empty!");
+            Assert.assertTrue(allOptions.contains(exactAddress), "Dropdown did not contain expected address: " + exactAddress);
+
+            // 3. Select the value
+            wellSiteAddressPage.selectAddressFromDropdown(exactAddress);
+            System.out.println("Successfully selected the address from the dropdown: " + exactAddress);
+        }
+
+        Thread.sleep(3000); // Wait for auto-fill and success banner
+
+        // Handle Address Correction if specified in Excel
+        if (isCorrectionNeeded != null && isCorrectionNeeded.equalsIgnoreCase("Yes")) {
+            wellSiteAddressPage.clickAddressCorrectionCheckbox();
+            wellSiteAddressPage.enterCorrectionNotes(correctionNotes);
+            System.out.println("Address correction notes entered.");
+        }
+
+        // Click Save and Continue
         wellSiteAddressPage.clickSaveAndContinue();
         System.out.println("Successfully filled address details and clicked Save and Continue.");
 
+        // 1. Initialize the Owner Information Page
+        OwnerInfoPage ownerPage = new OwnerInfoPage();
 
-        // --- 4. ASSERT NAVIGATION TO NEXT PAGE ---
+        // 2. Log the action (optional, but helpful for debugging)
+        System.out.println("Populating Owner Info with Email: " + ownerEmail + " and Phone: " + ownerPhone);
 
-        // Wait a few seconds to allow the browser to load the new page
+        // 3. Call the consolidated method to fill the fields and click Save
+        ownerPage.fillOwnerContactInfoAndSubmit(ownerEmail, ownerPhone);
+
+        if (isOwnerCorrectionNeeded != null && isOwnerCorrectionNeeded.equalsIgnoreCase("Yes")) {
+            ownerInfoPage.clickOwnerAddressCorrectionCheckbox();
+            ownerInfoPage.enterOwnerAddressCorrectionNotes(ownercorrectionNotes);
+            System.out.println("Address correction notes entered.");
+        }
+
+        // --- 4. ASSERT NAVIGATION TO WELL INFO PAGE ---
         Thread.sleep(5000);
-
-        // Get the new URL
-        String nextUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
-
-        // Assert the URL contains "GreenFormOwnerInfo"
-        Assert.assertTrue(nextUrl.contains("GreenFormOwnerInfo"),
-                "Failed to navigate to the Owner Info page. Current URL is: " + nextUrl);
-        Allure.step("Successfully verified navigation to the Owner Information page.");
-        System.out.println("Successfully navigated to the Owner Information page!");
-
-        // --- 5. FILL OUT OWNER INFORMATION PAGE ---
-
-
-        ownerInfoPage.fillBusinessOwnerInfoAndSubmit("Test Drilling Company LLC", "5551234567", "test@example.com");
-
-        // --- 6. ASSERT NAVIGATION TO NEXT PAGE ---
-        Thread.sleep(5000); // Wait for next page to load
         String nextUrlAfterOwner = DriverManagerPom.getDriverPom().getCurrentUrl();
+        Assert.assertTrue(nextUrlAfterOwner.contains("WellInformation") || nextUrlAfterOwner.contains("WellInfo"), "Failed to navigate to the Well Information page. Current URL is: " + nextUrlAfterOwner);
 
-        // Assuming the next page is "Well Information"
-        Assert.assertTrue(nextUrlAfterOwner.contains("WellInformation") || nextUrlAfterOwner.contains("WellInfo"),
-                "Failed to navigate to the Well Information page. Current URL is: " + nextUrlAfterOwner);
-
-        //Reporter.log("Navigation Assertion Passed! User is on the Well Information page.", true);
-
-
-// --- 7. FILL OUT WELL INFORMATION PAGE ---
-
-        // A. Set up the local file path for the upload safely using File.separator
+        // --- 5. FILL OUT WELL INFORMATION PAGE ---
         String projectPath = System.getProperty("user.dir");
         String siteMapPath = projectPath + java.io.File.separator + "src" + java.io.File.separator + "test" + java.io.File.separator + "resources" + java.io.File.separator + "testData" + java.io.File.separator + "dummySiteMap.pdf";
 
-        // Safety Check: Verify the file actually exists before Selenium tries to use it
         java.io.File uploadFile = new java.io.File(siteMapPath);
-        if(!uploadFile.exists()){
-            System.out.println("CRITICAL ERROR: Cannot find the PDF at: " + siteMapPath);
-            Assert.fail("Test failed because the dummySiteMap.pdf file is missing. Please create it.");
+        if (!uploadFile.exists()) {
+            Assert.fail("Test failed because the dummySiteMap.pdf file is missing at: " + siteMapPath);
         }
 
-        // B. Clean up the numbers from Excel (removes ".0" if Excel interpreted them as decimals)
+        // Clean up numeric strings from Excel
         String cleanPump = String.valueOf(pumpRate).replace(".0", "");
         String cleanQty = String.valueOf(dailyQty).replace(".0", "");
         String cleanDepth = String.valueOf(depth).replace(".0", "");
         String cleanDiam = String.valueOf(diameter).replace(".0", "");
 
-        // C. Call the wrapper method using the variables straight from the DataProvider
-        WellInfoPage wellInfoPage = new WellInfoPage();
         wellInfoPage.fillWellInfoAndSubmit(
-                wellType,
-                cleanPump,
-                cleanQty,
-                cleanDepth,
-                cleanDiam,
-                drillMethod,
-                sourceWater,
-                siteMapPath
+                wellType, cleanPump, cleanQty, cleanDepth, cleanDiam, drillMethod, sourceWater, siteMapPath
         );
 
-
-        // --- 8. ASSERT NAVIGATION TO REVIEW PAGE ---
-
-        Thread.sleep(5000); // Wait for the server to process the form and file
+        // --- 6. ASSERT NAVIGATION TO REVIEW PAGE ---
+        Thread.sleep(5000);
         String nextUrlAfterWellInfo = DriverManagerPom.getDriverPom().getCurrentUrl();
-
-        // Based on the JS in the HTML, a successful submit redirects to "/Application/NewWellPermit/Review/"
-        Assert.assertTrue(nextUrlAfterWellInfo.contains("Review"),
-                "Failed to navigate to the Review page. Current URL is: " + nextUrlAfterWellInfo);
-
-        System.out.println("Navigation Assertion Passed! User is on the Application Review page.");
+        Assert.assertTrue(nextUrlAfterWellInfo.contains("Review"), "Failed to navigate to the Review page. Current URL is: " + nextUrlAfterWellInfo);
         io.qameta.allure.Allure.step("Successfully verified navigation to the Review page.");
 
-        Thread.sleep(5000);
 
-        // --- 9. FILL OUT REVIEW PAGE & SIGN ---
-
-        ReviewPage reviewPage = new ReviewPage();
-        // Pass the signature name directly from the Excel sheet
+        // --- 7. FILL OUT REVIEW PAGE & SIGN ---
         reviewPage.signAndSubmit(signatureName);
 
-
-        // --- 10. ASSERT FINAL SUCCESSFUL SUBMISSION (PAYMENT PAGE) ---
-
-        // Wait for the AJAX submission to process and redirect the page
+        // --- 8. ASSERT FINAL SUCCESSFUL SUBMISSION (PAYMENT PAGE) ---
         Thread.sleep(5000);
         String finalUrl = DriverManagerPom.getDriverPom().getCurrentUrl();
-
-        // Verify the system successfully submitted the form and routed the user to pay
-        Assert.assertTrue(finalUrl.contains("Payment"),
-                "Submission failed! Did not navigate to the Payment page. Current URL is: " + finalUrl);
-
+        Assert.assertTrue(finalUrl.contains("Payment"), "Submission failed! Did not navigate to the Payment page. Current URL is: " + finalUrl);
         System.out.println("SUCCESS! Permit successfully submitted. User is on the Payment page.");
 
+        SubmissionSuccessPage successPage = new SubmissionSuccessPage();
+
+        //  Run the hard assertions
+        successPage.verifySuccessfulSubmission();
+
+        // Extract the ID so you can see it in your IntelliJ console and Extent/Allure reports
+        String newApplicationId = successPage.getApplicationId();
+
+
     }
+
+    @Test(description = "Verify validation messages on Well Site Address page when submitting blank form")
+    public void Verify_WellSiteAddress_Validations() throws InterruptedException {
+
+        // --- INITIALIZE PAGES ---
+        LoginPage loginPage = new LoginPage();
+        DashboardPage dashboardPage = new DashboardPage();
+        WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
+
+        // --- LOGIN & NAVIGATION ---
+        loginPage.navigateToPOM(BASE_URL);
+        loginPage.login(STANDARD_USERNAME, STANDARD_PASSWORD);
+
+        Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful!");
+        System.out.println("Login Passed for Validation Test!");
+
+        // Wait for Dashboard to load and click New Application
+        Thread.sleep(5000);
+        dashboardPage.clickNewApplication();
+        Thread.sleep(5000); // Wait for the Well Site Address page to render
+
+        // --- TRIGGER VALIDATIONS ---
+        System.out.println("Clicking Save and Continue without entering data...");
+        wellSiteAddressPage.clickSaveAndContinue();
+
+        // --- ASSERT ERRORS ---
+        wellSiteAddressPage.verifyBlankSubmissionErrors();
+    }
+
+    @Test(description = "Verify validation messages on Owner Information page when submitting blank form")
+    public void Verify_OwnerInfo_Validations() throws InterruptedException {
+
+        // --- INITIALIZE PAGES ---
+        LoginPage loginPage = new LoginPage();
+        DashboardPage dashboardPage = new DashboardPage();
+        WellSiteAddressPage wellSiteAddressPage = new WellSiteAddressPage();
+        OwnerInfoPage ownerInfoPage = new OwnerInfoPage();
+
+        // --- LOGIN & NAVIGATION ---
+        loginPage.navigateToPOM(BASE_URL);
+        loginPage.login(STANDARD_USERNAME, STANDARD_PASSWORD);
+        Assert.assertTrue(dashboardPage.isUserOnDashboardUrl(), "Login was not successful!");
+
+        // Go to New Application
+        Thread.sleep(5000);
+        dashboardPage.clickNewApplication();
+        Thread.sleep(5000);
+
+        // --- 1. BYPASS WELL SITE ADDRESS PAGE ---
+        // Provide valid dummy data to get past step 1.
+        // Adjust these methods based on what works best for your environment.
+        wellSiteAddressPage.selectPropertySearchRadio();
+        wellSiteAddressPage.searchByPropertyNumber("1101000063"); // Use a valid dummy Property Number
+        wellSiteAddressPage.clickSearchButton();
+        Thread.sleep(3000); // Wait for auto-fill
+        wellSiteAddressPage.clickSaveAndContinue();
+
+        // Ensure we successfully landed on the Owner Info page
+        Thread.sleep(3000);
+        Assert.assertTrue(DriverManagerPom.getDriverPom().getCurrentUrl().contains("OwnerInfo"), "Did not reach Owner Information page.");
+
+        // --- 2. TRIGGER OWNER INFO VALIDATIONS ---
+        System.out.println("Clicking Save and Continue on Owner Info without entering data...");
+        // Call the click method directly without passing email/phone data
+        ownerInfoPage.clickSaveAndContinue();
+
+        // --- 3. ASSERT ERRORS ---
+        ownerInfoPage.verifyBlankSubmissionErrors();
+    }
+
 
     // --- 1. SET UP THE DATA PROVIDER FOR ADDRESSES ---
     @DataProvider(name = "addressData")

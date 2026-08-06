@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.testng.Assert;
 import pomFramework.driverPom.DriverManagerPom;
 import io.qameta.allure.Step;
 
@@ -17,56 +18,51 @@ public class OwnerInfoPage extends BasePage {
 
     // --- LOCATORS ---
 
-    // 1. Owner is a Business Checkbox
-    // Note: The HTML shows this is checked by default.
-    @FindBy(id = "IsBusiness")
-    private WebElement isBusinessCheckbox;
-
-    // 2. Individual Fields (Only visible if IsBusiness is unchecked)
-    @FindBy(id = "PersonContact_FirstName")
-    private WebElement firstNameInput;
-
-    @FindBy(id = "PersonContact_LastName")
-    private WebElement lastNameInput;
-
-    // 3. Business Fields (Only visible if IsBusiness is checked)
-    @FindBy(id = "PersonContact_CompanyName")
-    private WebElement companyNameInput;
-
-    // 4. Contact Information
+    // Contact Information
     @FindBy(id = "PersonContact_Email")
     private WebElement emailInput;
 
     @FindBy(id = "PersonContact_Phone")
     private WebElement phoneInput;
 
-    // 5. Sync Well Site Address Checkbox
-    @FindBy(id = "SyncWellSiteAddress")
-    private WebElement syncWellSiteAddressCheckbox;
+    // Added based on the screenshot (Update ID if different in your DOM)
+    @FindBy(xpath = "//label[contains(text(), 'Address Correction Needed')]/preceding-sibling::input")
+    private WebElement addressCorrectionCheckbox;
 
-    // 6. Save and Continue Button
-    @FindBy(id = "nextButton")
+    // Save and Continue Button
+    @FindBy(xpath = "//button[normalize-space()='Save and Continue']")
     private WebElement saveAndContinueBtn;
 
+    @FindBy(xpath = "//label[@for='OwnerAddressCorrectionNeeded']")
+    WebElement ownerAddressCorrectionCheckboxLabel;
+
+    @FindBy(id = "OwnerAddressCorrectionNotes")
+    WebElement addressCorrectionNotesTextarea;
+
+
+
+    // --- VALIDATION ERROR LOCATORS ---
+
+    // Top Banner Errors
+    @FindBy(xpath = "//li[normalize-space()='Email is required.']")
+    private WebElement bannerErrorEmail;
+
+    @FindBy(xpath = "//li[normalize-space()='Phone number is required.']")
+    private WebElement bannerErrorPhone;
+
+    // Inline Field Errors (Using the OR '|' operator to handle standard error tag types)
+    @FindBy(xpath = "//span[normalize-space()='Email is required.'] | //div[contains(@class, 'error-message') and contains(text(), 'Email is required.')]")
+    private WebElement inlineErrorEmail;
+
+    @FindBy(xpath = "//span[normalize-space()='Phone number is required.'] | //div[contains(@class, 'error-message') and contains(text(), 'Phone number is required.')]")
+    private WebElement inlineErrorPhone;
+
+
+
+
+
+
     // --- METHODS ---
-
-    @Step("Setting 'Owner is a Business' checkbox to: {0}")
-    public void setBusinessCheckbox(boolean shouldBeChecked) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("IsBusiness")));
-
-        // If the checkbox state doesn't match what we want, click it
-        if (isBusinessCheckbox.isSelected() != shouldBeChecked) {
-            JavascriptExecutor js = (JavascriptExecutor) DriverManagerPom.getDriverPom();
-            js.executeScript("arguments[0].click();", isBusinessCheckbox);
-        }
-    }
-
-    @Step("Entering Owner Phone Number: {0}")
-    public void enterPhoneNumber(String phoneNumber) {
-        wait.until(ExpectedConditions.visibilityOf(phoneInput));
-        phoneInput.clear();
-        phoneInput.sendKeys(phoneNumber);
-    }
 
     @Step("Entering Owner Email: {0}")
     public void enterEmail(String email) {
@@ -75,32 +71,11 @@ public class OwnerInfoPage extends BasePage {
         emailInput.sendKeys(email);
     }
 
-    @Step("Entering Individual Name: {0} {1}")
-    public void enterIndividualName(String firstName, String lastName) {
-        wait.until(ExpectedConditions.visibilityOf(firstNameInput));
-        firstNameInput.clear();
-        firstNameInput.sendKeys(firstName);
-
-        lastNameInput.clear();
-        lastNameInput.sendKeys(lastName);
-    }
-
-    @Step("Entering Business Name: {0}")
-    public void enterBusinessName(String businessName) {
-        wait.until(ExpectedConditions.visibilityOf(companyNameInput));
-        companyNameInput.clear();
-        companyNameInput.sendKeys(businessName);
-    }
-
-    @Step("Checking 'Same as Well Site Address'")
-    public void checkSameAsWellSiteAddress() {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id("SyncWellSiteAddress")));
-
-        if (!syncWellSiteAddressCheckbox.isSelected()) {
-            // Using JS click because standard click often gets intercepted by USWDS labels
-            JavascriptExecutor js = (JavascriptExecutor) DriverManagerPom.getDriverPom();
-            js.executeScript("arguments[0].click();", syncWellSiteAddressCheckbox);
-        }
+    @Step("Entering Owner Phone Number: {0}")
+    public void enterPhoneNumber(String phoneNumber) {
+        wait.until(ExpectedConditions.visibilityOf(phoneInput));
+        phoneInput.clear();
+        phoneInput.sendKeys(phoneNumber);
     }
 
     @Step("Clicking Save and Continue on Owner Info Page")
@@ -114,22 +89,67 @@ public class OwnerInfoPage extends BasePage {
         try {
             saveAndContinueBtn.click();
         } catch (org.openqa.selenium.ElementClickInterceptedException e) {
+            // Using JS click as a fallback for USWDS design system elements
             js.executeScript("arguments[0].click();", saveAndContinueBtn);
         }
     }
 
-    @Step("Filling out Business Owner Information and submitting")
-    public void fillBusinessOwnerInfoAndSubmit(String businessName, String phone, String email) throws InterruptedException {
-        setBusinessCheckbox(true);
-        enterBusinessName(businessName);
-        enterPhoneNumber(phone);
+    @Step("Filling out Owner Contact Information and submitting")
+    public void fillOwnerContactInfoAndSubmit(String email, String phone) throws InterruptedException {
         enterEmail(email);
-        checkSameAsWellSiteAddress();
-
-        // Wait a moment for the javascript to auto-fill the address dropdowns
-        Thread.sleep(3000);
-
+        enterPhoneNumber(phone);
         clickSaveAndContinue();
     }
 
+    // --- METHODS ---
+
+    @Step("Verify validation messages for blank submission on Owner Info page")
+    public void verifyBlankSubmissionErrors() {
+        // Wait for the banner error to appear after clicking Save and Continue
+        wait.until(ExpectedConditions.visibilityOf(bannerErrorEmail));
+
+        // Assert Top Banner Errors
+        Assert.assertTrue(bannerErrorEmail.isDisplayed(), "Top banner is missing 'Email is required.' error.");
+        Assert.assertTrue(bannerErrorPhone.isDisplayed(), "Top banner is missing 'Phone number is required.' error.");
+
+        // Assert Inline Errors
+        Assert.assertTrue(inlineErrorEmail.isDisplayed(), "Inline error 'Email is required.' is missing below the Email field.");
+        Assert.assertTrue(inlineErrorPhone.isDisplayed(), "Inline error 'Phone number is required.' is missing below the Phone field.");
+
+        System.out.println("Successfully verified all expected validation errors on the Owner Information page.");
+    }
+
+
+    @Step("Clicking Owner Address Correction Checkbox")
+    public void clickOwnerAddressCorrectionCheckbox() {
+        // 1. Wait for the label to be present in the DOM
+        // Make sure this xpath matches the one in your @FindBy above
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//label[@for='OwnerAddressCorrectionNeeded']")));
+
+        JavascriptExecutor js = (JavascriptExecutor) DriverManagerPom.getDriverPom();
+
+        // 2. Scroll it into view to ensure it is visible
+        js.executeScript("arguments[0].scrollIntoView({block: 'center'});", ownerAddressCorrectionCheckboxLabel);
+
+        // 3. ONLY use the JavaScript click (Bypasses all interception errors)
+        js.executeScript("arguments[0].click();", ownerAddressCorrectionCheckboxLabel);
+
+        System.out.println("Owner Address Correction checkbox clicked successfully via JavaScript.");
+    }
+
+
+    @Step("Entering Owner Address Correction Notes")
+    public void enterOwnerAddressCorrectionNotes(String notes) {
+
+        // 1. Wait for the textarea to become VISIBLE after the checkbox click reveals it
+        wait.until(ExpectedConditions.visibilityOf(addressCorrectionNotesTextarea));
+
+        // 2. Clear the field (best practice before typing)
+        addressCorrectionNotesTextarea.clear();
+
+        // 3. Enter the discrepancy notes
+        addressCorrectionNotesTextarea.sendKeys(notes);
+
+        System.out.println("Owner Address Correction notes entered successfully.");
+    }
 }
